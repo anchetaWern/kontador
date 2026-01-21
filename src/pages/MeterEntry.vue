@@ -96,7 +96,7 @@ const roomOptions = computed(() => {
 })
 
 const form = ref({
-  apartment: 'Wern',
+  apartment: '',
   room: null,
   tenant: '',
   date: new Date().toISOString().slice(0, 10),
