@@ -24,7 +24,11 @@
                 <tbody>
                   <tr>
                     <td class="col-name"><strong>Room</strong></td>
-                    <td>{{ record.room }}</td>
+                    <td class="text-body-1 font-weight-bold">{{ record.room }}</td>
+                  </tr>
+                  <tr>
+                    <td class="col-name"><strong>Tenant</strong></td>
+                    <td>{{ record.tenant }}</td>
                   </tr>
                   <tr>
                     <td class="col-name"><strong>Date</strong></td>
@@ -44,7 +48,9 @@
                   </tr>
                   <tr>
                     <td class="col-name"><strong>Amount (₱)</strong></td>
-                    <td>{{ record.pay.toFixed(2) }}</td>
+                    <td>
+                        <mark class="text-body-1 font-weight-bold">{{ record.pay.toFixed(2) }}</mark>
+                    </td>
                   </tr>
                 </tbody>
               </v-simple-table>
@@ -81,6 +87,7 @@ const records = computed(() => {
   return apartment.rooms.flatMap(room =>
     room.records.map(rec => ({
       room: room.room,
+      tenant: rec.tenant,
       date: rec.date,
       prev_reading: rec.prev_reading,
       current_reading: rec.current_reading,
