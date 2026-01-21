@@ -52,6 +52,23 @@
                         <mark class="text-body-1 font-weight-bold">{{ record.pay.toFixed(2) }}</mark>
                     </td>
                   </tr>
+
+                    <tr>
+                        <td class="col-name"><strong>Amount (₱)</strong></td>
+                        <td>
+                        <mark class="text-body-1 font-weight-bold">{{ record.pay.toFixed(2) }}</mark>
+                        <v-btn
+                            small
+                            text
+                            color="yellow darken-2"
+                            class="ml-2"
+                            @click="copyAmount(record)"
+                        >
+                            Copy
+                        </v-btn>
+                        </td>
+                    </tr>
+
                 </tbody>
               </v-simple-table>
             </v-card-text>
@@ -96,6 +113,14 @@ const records = computed(() => {
     }))
   ).sort((a,b) => new Date(b.date) - new Date(a.date))
 })
+
+const copyAmount = (record) => {
+  const text = `${record.room}: ${record.tenant}: ₱${record.pay.toFixed(2)}. ` +
+               `Break down: ${record.current_reading} - ${record.prev_reading} * ${record.kwh_rate} = ${record.pay.toFixed(2)}`
+  navigator.clipboard.writeText(text)
+  alert('Copied to clipboard!')
+}
+
 </script>
 
 <style scoped>
