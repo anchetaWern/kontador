@@ -105,6 +105,16 @@ const form = ref({
   current_reading: null
 })
 
+const resetForm = () => {
+  form.value.apartment = ''
+  form.value.room = null
+  form.value.tenant = ''
+  form.value.date = new Date().toISOString().slice(0, 10)
+  form.value.kwh_rate = 12.16
+  form.value.prev_reading = null
+  form.value.current_reading = null
+}
+
 const loadPreviousReading = () => {
   const stored = JSON.parse(localStorage.getItem('meterRecords') || '[]')
 
@@ -191,7 +201,7 @@ const submit = () => {
 
   alert('Saved successfully')
 
-  // reset readings only
-  form.value.current_reading = null
+  
+  resetForm()
 }
 </script>
