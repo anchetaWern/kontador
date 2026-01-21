@@ -29,6 +29,13 @@
           </div>
         </v-list-item>
 
+        <v-list-item link :to="{ path: '/maintenance' }" @click="drawer = false">
+          <div class="d-flex align-center gap-3">
+            <v-icon>mdi-database</v-icon>
+            <span>Database</span>
+          </div>
+        </v-list-item>
+
       </v-list>
     </v-navigation-drawer>
 
