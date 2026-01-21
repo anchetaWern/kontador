@@ -11,6 +11,13 @@ import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import '@mdi/font/css/materialdesignicons.css'
 
+import { registerSW } from 'virtual:pwa-register'
+
+registerSW({
+  immediate: true
+})
+
+
 // Vuetify theme setup
 const vuetify = createVuetify({
   components,
