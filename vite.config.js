@@ -11,9 +11,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         navigateFallback: '/index.html',
-        globPatterns: ['**/*.{js,css,html,png,svg,ico}']
+        globPatterns: ['**/*.{js,css,html,png,svg,ico,woff,woff2}']
       },
-      includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt'],
+      includeAssets: ['favicon.ico', '**/*.{woff,woff2,ttf,eot,svg}'],
       manifest: {
         name: '⚡ Kontador',
         short_name: 'Kontador',
@@ -24,14 +24,14 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
+            "src": "/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
           },
           {
-            src: '/pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
+            "src": "/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
           }
         ]
       }
