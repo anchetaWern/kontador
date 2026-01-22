@@ -45,19 +45,28 @@
     </v-main>
 
     <v-slide-y-reverse-transition>
+      
       <v-card
-        v-if="showInstallBanner || isIOS && !isInstalled && !closeBanner"
+        v-if="(showInstallBanner || (isIOS && !isInstalled)) && !closeBanner"
         class="install-banner"
         elevation="8"
       >
         <div class="install-content">
           <div>
             <strong>Install Kontador</strong><br />
-            <small>Access faster, works offline ⚡</small>
+            <small v-if="!isIOS">Access faster, works offline ⚡</small>
+
+            <small v-else>
+              Tap
+              <v-icon size="16" class="mx-1">mdi-export-variant</v-icon>
+              then <b>Add to Home Screen</b>
+            </small>
           </div>
 
           <div class="actions">
+            <!-- Normal install button (Android / Desktop) -->
             <v-btn
+              v-if="!isIOS"
               color="yellow-darken-2"
               prepend-icon="mdi-download"
               @click="installPWA"
@@ -65,6 +74,7 @@
               Install
             </v-btn>
 
+            <!-- iOS has no install button -->
             <v-btn
               icon
               variant="text"
@@ -75,7 +85,9 @@
           </div>
         </div>
       </v-card>
+
     </v-slide-y-reverse-transition>
+
 
   </v-app>
 </template>
@@ -89,13 +101,14 @@ const deferredPrompt = ref(null)
 const showInstallBanner = ref(false)
 const closeBanner = ref(false);
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
-
+console.log('is ios: ', isIOS);
 
 onMounted(() => {
   // Already installed? Don’t show banner
   const isInstalled =
     window.matchMedia('(display-mode: standalone)').matches ||
     window.navigator.standalone === true
+    console.log('is installed: ', isInstalled);
 
   if (isInstalled) return
 
