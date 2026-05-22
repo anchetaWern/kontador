@@ -2,10 +2,9 @@
   <v-app>
     <v-container class="pa-6" max-width="600">
       <v-card>
-        <v-card-title>Electric Meter Entry</v-card-title>
+        <v-card-title>Bill Entry</v-card-title>
         <v-card-text>
           <v-form @submit.prevent="submit">
-
             <v-select
               v-model="form.apartment"
               label="Apartment"
@@ -17,6 +16,7 @@
               v-model="form.room"
               label="Room Number"
               :items="roomOptions"
+              :disabled="!form.apartment"
               required
             />
 
@@ -38,6 +38,7 @@
               label="kWh Rate"
               type="number"
               step="0.01"
+              min="0"
             />
 
             <v-text-field
@@ -45,6 +46,7 @@
               label="Previous Reading"
               type="number"
               step="0.01"
+              min="0"
               required
             />
 
@@ -53,16 +55,44 @@
               label="Current Reading"
               type="number"
               step="0.01"
+              min="0"
               required
             />
 
-            <v-alert
-              type="success"
-              class="mt-3"
-              v-if="pay > 0"
-            >
-              Amount to Pay: ₱ {{ pay.toFixed(2) }}
-            </v-alert>
+            <v-text-field
+              v-model.number="form.wifi_rate"
+              label="Wifi Rate"
+              type="number"
+              step="0.01"
+              min="0"
+            />
+
+            <v-text-field
+              v-model.number="form.water_rate"
+              label="Water Rate"
+              type="number"
+              step="0.01"
+              min="0"
+            />
+
+            <v-card class="mt-4 summary-card" color="yellow-lighten-5" variant="tonal">
+              <v-card-text>
+                <div class="summary-label">Bill Breakdown: {{ form.room || 'No room selected' }}</div>
+                <div class="summary-line">
+                  <span>Electric</span>
+                  <strong>₱ {{ electricAmount.toFixed(2) }}</strong>
+                </div>
+                <div class="summary-line">
+                  <span>Water</span>
+                  <strong>₱ {{ Number(form.water_rate || 0).toFixed(2) }}</strong>
+                </div>
+                <div class="summary-line">
+                  <span>Wifi</span>
+                  <strong>₱ {{ Number(form.wifi_rate || 0).toFixed(2) }}</strong>
+                </div>
+                <div class="summary-total">Total Bill: ₱ {{ totalAmount.toFixed(2) }}</div>
+              </v-card-text>
+            </v-card>
 
             <v-btn
               type="submit"
@@ -72,7 +102,6 @@
             >
               Save Record
             </v-btn>
-
           </v-form>
         </v-card-text>
       </v-card>
@@ -81,92 +110,107 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import {
+  getApartments,
+  getLatestRoomRecord,
+  getMeterRecords,
+  getWaterRate,
+  getWifiRate,
+  setMeterRecords
+} from '../utils/storage'
 
-const apartmentNames = computed(() => {
-  const stored = JSON.parse(localStorage.getItem('apartments') || '[]')
-  return stored.map(a => a.name)
-})
+const apartments = computed(() => getApartments())
+
+const apartmentNames = computed(() => apartments.value.map(apartment => apartment.name))
 
 const roomOptions = computed(() => {
   if (!form.value.apartment) return []
-  const stored = JSON.parse(localStorage.getItem('apartments') || '[]')
-  const apartment = stored.find(a => a.name === form.value.apartment)
+
+  const apartment = apartments.value.find(item => item.name === form.value.apartment)
   return apartment ? apartment.rooms : []
 })
 
-const form = ref({
+const createDefaultForm = () => ({
   apartment: '',
   room: null,
   tenant: '',
   date: new Date().toISOString().slice(0, 10),
   kwh_rate: 12.16,
-  prev_reading: null,
-  current_reading: null
+  prev_reading: 0,
+  current_reading: null,
+  wifi_rate: getWifiRate().amount,
+  water_rate: 0
 })
 
+const form = ref(createDefaultForm())
+
 const resetForm = () => {
-  form.value.apartment = ''
-  form.value.room = null
-  form.value.tenant = ''
-  form.value.date = new Date().toISOString().slice(0, 10)
-  form.value.kwh_rate = 12.16
-  form.value.prev_reading = null
-  form.value.current_reading = null
+  form.value = createDefaultForm()
+}
+
+const hydrateRoomRates = () => {
+  form.value.wifi_rate = getWifiRate().amount
+  form.value.water_rate = getWaterRate(form.value.apartment, form.value.room)
 }
 
 const loadPreviousReading = () => {
-  const stored = JSON.parse(localStorage.getItem('meterRecords') || '[]')
+  const latestRecord = getLatestRoomRecord(form.value.apartment, form.value.room)
 
-  const apartment = stored.find(
-    a => a.apartment === form.value.apartment
-  )
+  hydrateRoomRates()
 
-  if (!apartment) {
+  if (!latestRecord) {
+    form.value.tenant = ''
     form.value.prev_reading = 0
     return
   }
 
-  const room = apartment.rooms.find(
-    r => r.room === form.value.room
-  )
-
-  if (!room || room.records.length === 0) {
-    form.value.prev_reading = 0
-    return
-  }
-
-  const latestRecord = room.records[room.records.length - 1]
-
-  form.value.tenant = latestRecord.tenant;
-  form.value.prev_reading = latestRecord.current_reading
+  form.value.tenant = latestRecord.tenant ?? ''
+  form.value.prev_reading = Number(latestRecord.current_reading) || 0
 }
 
 watch(
-  () => [form.value.apartment, form.value.room],
+  () => form.value.apartment,
   () => {
+    form.value.room = null
+    form.value.tenant = ''
+    form.value.prev_reading = 0
+    form.value.current_reading = null
+    hydrateRoomRates()
+  }
+)
+
+watch(
+  () => [form.value.apartment, form.value.room],
+  ([apartment, room]) => {
+    if (!apartment || !room) {
+      hydrateRoomRates()
+      return
+    }
+
     loadPreviousReading()
   }
 )
 
-const pay = computed(() => {
-  if (
-    form.value.prev_reading == null ||
-    form.value.current_reading == null
-  ) return 0
+const electricAmount = computed(() => {
+  if (form.value.prev_reading == null || form.value.current_reading == null) return 0
 
   return (
-    (form.value.current_reading - form.value.prev_reading) *
-    form.value.kwh_rate
+    (Number(form.value.current_reading) - Number(form.value.prev_reading)) *
+    Number(form.value.kwh_rate || 0)
   )
 })
 
-const submit = () => {
-  const stored = JSON.parse(localStorage.getItem('meterRecords') || '[]')
+const totalAmount = computed(() => (
+  electricAmount.value +
+  Number(form.value.wifi_rate || 0) +
+  Number(form.value.water_rate || 0)
+))
 
-  let apartment = stored.find(
-    a => a.apartment === form.value.apartment
-  )
+const submit = () => {
+  const stored = getMeterRecords()
+
+  let apartment = stored.find(item => item.apartment === form.value.apartment)
 
   if (!apartment) {
     apartment = {
@@ -176,9 +220,7 @@ const submit = () => {
     stored.push(apartment)
   }
 
-  let room = apartment.rooms.find(
-    r => r.room === form.value.room
-  )
+  let room = apartment.rooms.find(item => item.room === form.value.room)
 
   if (!room) {
     room = {
@@ -191,17 +233,55 @@ const submit = () => {
   room.records.push({
     tenant: form.value.tenant,
     date: form.value.date,
-    current_reading: form.value.current_reading,
-    prev_reading: form.value.prev_reading,
-    kwh_rate: form.value.kwh_rate,
-    pay: Number(pay.value.toFixed(2))
+    current_reading: Number(form.value.current_reading),
+    prev_reading: Number(form.value.prev_reading),
+    kwh_rate: Number(form.value.kwh_rate || 0),
+    electric_amount: Number(electricAmount.value.toFixed(2)),
+    wifi_rate: Number(form.value.wifi_rate || 0),
+    water_rate: Number(form.value.water_rate || 0),
+    total_amount: Number(totalAmount.value.toFixed(2))
   })
 
-  localStorage.setItem('meterRecords', JSON.stringify(stored))
-
+  setMeterRecords(stored)
   alert('Saved successfully')
-
-  
   resetForm()
 }
 </script>
+
+<style scoped>
+.summary-card {
+  border: 1px solid rgba(251, 192, 45, 0.35);
+}
+
+.summary-card :deep(.v-card-text) {
+  color: #111111 !important;
+}
+
+.summary-card :deep(.v-card-text strong),
+.summary-card :deep(.v-card-text span),
+.summary-card :deep(.v-card-text div) {
+  color: #111111 !important;
+}
+
+.summary-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+.summary-total {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-top: 16px;
+}
+</style>

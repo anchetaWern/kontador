@@ -48,33 +48,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { exportAppData, importAppData } from '../utils/storage'
 
 const exportText = ref('')
 const importText = ref('')
 
 const loadAllData = () => {
-  const apartments = JSON.parse(localStorage.getItem('apartments') || '[]')
-  const meterRecords = JSON.parse(localStorage.getItem('meterRecords') || '[]')
-
-  // Prepare latest records for each room
-  const latestMeterRecords = meterRecords.map(apartment => {
-    const rooms = apartment.rooms.map(r => {
-      const latestRecord = r.records.length ? r.records[r.records.length - 1] : null
-      return {
-        room: r.room,
-        records: latestRecord ? [latestRecord] : []
-      }
-    })
-    return {
-      apartment: apartment.apartment,
-      rooms
-    }
-  })
-
-  exportText.value = JSON.stringify({
-    apartments,
-    meterRecords: latestMeterRecords
-  }, null, 2)
+  exportText.value = JSON.stringify(exportAppData(), null, 2)
 }
 
 const copyToClipboard = () => {
@@ -85,12 +65,7 @@ const copyToClipboard = () => {
 const importData = () => {
   try {
     const parsed = JSON.parse(importText.value)
-    if (parsed.apartments) {
-      localStorage.setItem('apartments', JSON.stringify(parsed.apartments))
-    }
-    if (parsed.meterRecords) {
-      localStorage.setItem('meterRecords', JSON.stringify(parsed.meterRecords))
-    }
+    importAppData(parsed)
     alert('Data imported successfully!')
     loadAllData() // refresh export
   } catch (err) {

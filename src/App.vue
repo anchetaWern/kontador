@@ -12,7 +12,7 @@
         <v-list-item link :to="{ path: '/meter' }" @click="drawer = false">
           <div class="d-flex align-center gap-3">
             <v-icon>mdi-flash</v-icon>
-            <span>Electric Meter Entry</span>
+            <span>Bill Entry</span>
           </div>
         </v-list-item>
 
@@ -20,6 +20,20 @@
           <div class="d-flex align-center gap-3">
             <v-icon>mdi-home-edit</v-icon>
             <span>Apartment Setup</span>
+          </div>
+        </v-list-item>
+
+        <v-list-item link :to="{ path: '/wifi-rate' }" @click="drawer = false">
+          <div class="d-flex align-center gap-3">
+            <v-icon>mdi-wifi</v-icon>
+            <span>Wifi Rate</span>
+          </div>
+        </v-list-item>
+
+        <v-list-item link :to="{ path: '/water-rate' }" @click="drawer = false">
+          <div class="d-flex align-center gap-3">
+            <v-icon>mdi-water</v-icon>
+            <span>Water Rate</span>
           </div>
         </v-list-item>
 

@@ -27,6 +27,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { getApartments, setApartments } from '../utils/storage'
 
 const apartmentName = ref('')
 const roomsText = ref('')
@@ -37,7 +38,7 @@ const saveSetup = () => {
   const rooms = roomsText.value.split(',').map(r => r.trim()).filter(r => r)
   if (rooms.length === 0) return alert('Add at least one room')
 
-  const stored = JSON.parse(localStorage.getItem('apartments') || '[]')
+  const stored = getApartments()
   const existing = stored.find(a => a.name === apartmentName.value)
 
   if (existing) {
@@ -46,7 +47,7 @@ const saveSetup = () => {
     stored.push({ name: apartmentName.value, rooms })
   }
 
-  localStorage.setItem('apartments', JSON.stringify(stored))
+  setApartments(stored)
   alert('Apartment saved!')
   apartmentName.value = ''
   roomsText.value = ''
