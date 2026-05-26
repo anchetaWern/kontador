@@ -9,6 +9,13 @@
     <v-navigation-drawer app v-model="drawer" temporary>
       <v-list nav dense>
 
+        <v-list-item link :to="{ path: '/dashboard' }" @click="drawer = false">
+          <div class="d-flex align-center gap-3">
+            <v-icon>mdi-view-dashboard</v-icon>
+            <span>Dashboard</span>
+          </div>
+        </v-list-item>
+
         <v-list-item link :to="{ path: '/meter' }" @click="drawer = false">
           <div class="d-flex align-center gap-3">
             <v-icon>mdi-flash</v-icon>
@@ -34,6 +41,13 @@
           <div class="d-flex align-center gap-3">
             <v-icon>mdi-water</v-icon>
             <span>Water Rate</span>
+          </div>
+        </v-list-item>
+
+        <v-list-item link :to="{ path: '/due-date' }" @click="drawer = false">
+          <div class="d-flex align-center gap-3">
+            <v-icon>mdi-calendar-month</v-icon>
+            <span>Due Date</span>
           </div>
         </v-list-item>
 

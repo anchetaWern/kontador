@@ -4,9 +4,24 @@
       <v-card-title>Wifi Rate</v-card-title>
       <v-card-text>
         <v-form @submit.prevent="saveRate">
+          <v-select
+            v-model="selectedApartment"
+            label="Apartment"
+            :items="apartmentNames"
+            required
+          />
+
+          <v-select
+            v-model="selectedRoom"
+            label="Room"
+            :items="roomOptions"
+            :disabled="!selectedApartment"
+            required
+          />
+
           <v-text-field
             v-model.number="wifiRate"
-            label="Global Wifi Rate"
+            label="Wifi Rate"
             type="number"
             step="0.01"
             min="0"
@@ -23,13 +38,37 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { getWifiRate, setWifiRate } from '../utils/storage'
+import { computed, ref, watch } from 'vue'
+import { getApartments, getWifiRate, setWifiRate } from '../utils/storage'
 
-const wifiRate = ref(getWifiRate().amount)
+const apartments = ref(getApartments())
+const selectedApartment = ref('')
+const selectedRoom = ref('')
+const wifiRate = ref(0)
+
+const apartmentNames = computed(() => apartments.value.map(apartment => apartment.name))
+
+const roomOptions = computed(() => {
+  const apartment = apartments.value.find(item => item.name === selectedApartment.value)
+  return apartment?.rooms ?? []
+})
+
+watch(selectedApartment, () => {
+  selectedRoom.value = ''
+  wifiRate.value = 0
+})
+
+watch(selectedRoom, () => {
+  wifiRate.value = getWifiRate(selectedApartment.value, selectedRoom.value)
+})
 
 const saveRate = () => {
-  setWifiRate(wifiRate.value)
+  if (!selectedApartment.value || !selectedRoom.value) {
+    alert('Select apartment and room')
+    return
+  }
+
+  setWifiRate(selectedApartment.value, selectedRoom.value, wifiRate.value)
   alert('Wifi rate saved!')
 }
 </script>

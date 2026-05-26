@@ -26,6 +26,10 @@
               required
             />
 
+            <div v-if="dueDateDisplay" class="due-date-text">
+              Due Date: {{ dueDateDisplay }}
+            </div>
+
             <v-text-field
               v-model="form.date"
               type="date"
@@ -113,6 +117,7 @@
 import { computed, ref, watch } from 'vue'
 import {
   getApartments,
+  getDueDate,
   getLatestRoomRecord,
   getMeterRecords,
   getWaterRate,
@@ -139,18 +144,37 @@ const createDefaultForm = () => ({
   kwh_rate: 12.16,
   prev_reading: 0,
   current_reading: null,
-  wifi_rate: getWifiRate().amount,
+  wifi_rate: 0,
   water_rate: 0
 })
 
 const form = ref(createDefaultForm())
+
+const formatDueDate = (value) => {
+  if (!value) return ''
+
+  const [month, day] = value.split('-')
+  if (!month || !day) return ''
+
+  const parsed = new Date(`2000-${month}-${day}T00:00:00`)
+  if (Number.isNaN(parsed.getTime())) return ''
+
+  return parsed.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+const dueDateDisplay = computed(() => (
+  formatDueDate(getDueDate(form.value.apartment, form.value.room))
+))
 
 const resetForm = () => {
   form.value = createDefaultForm()
 }
 
 const hydrateRoomRates = () => {
-  form.value.wifi_rate = getWifiRate().amount
+  form.value.wifi_rate = getWifiRate(form.value.apartment, form.value.room)
   form.value.water_rate = getWaterRate(form.value.apartment, form.value.room)
 }
 
@@ -283,5 +307,13 @@ const submit = () => {
   font-weight: 800;
   line-height: 1.1;
   margin-top: 16px;
+}
+
+.due-date-text {
+  margin-top: -8px;
+  margin-bottom: 16px;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 </style>
