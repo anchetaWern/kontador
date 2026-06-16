@@ -60,8 +60,15 @@
 
         <v-list-item link :to="{ path: '/maintenance' }" @click="drawer = false">
           <div class="d-flex align-center gap-3">
+            <v-icon>mdi-wrench-clock</v-icon>
+            <span>Maintenance</span>
+          </div>
+        </v-list-item>
+
+        <v-list-item link :to="{ path: '/data-backup' }" @click="drawer = false">
+          <div class="d-flex align-center gap-3">
             <v-icon>mdi-database</v-icon>
-            <span>Database</span>
+            <span>Data Backup</span>
           </div>
         </v-list-item>
 

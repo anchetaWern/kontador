@@ -5,6 +5,7 @@ import MeterEntry from './pages/MeterEntry.vue'
 import LatestEntries from './pages/LatestEntries.vue'
 import MeterHistory from './pages/MeterHistory.vue'
 import DataBackupAndRestore from './pages/DataBackupAndRestore.vue'
+import MaintenancePage from './pages/MaintenancePage.vue'
 import WifiRate from './pages/WifiRate.vue'
 import WaterRate from './pages/WaterRate.vue'
 import DueDate from './pages/DueDate.vue'
@@ -19,7 +20,8 @@ const routes = [
   { path: '/due-date', component: DueDate },
   { path: '/latest', component: LatestEntries },
   { path: '/meter-history', component: MeterHistory },
-  { path: '/maintenance', component: DataBackupAndRestore },
+  { path: '/maintenance', component: MaintenancePage },
+  { path: '/data-backup', component: DataBackupAndRestore },
 ]
 
 const router = createRouter({

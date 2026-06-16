@@ -5,6 +5,7 @@ const WIFI_RATES_KEY = 'wifiRates'
 const WATER_RATES_KEY = 'waterRates'
 const DUE_DATES_KEY = 'dueDates'
 const CURRENT_MONTH_PAYMENTS_KEY = 'currentMonthPayments'
+const MAINTENANCE_HISTORY_KEY = 'maintenanceHistory'
 
 const readJson = (key, fallback) => {
   try {
@@ -41,6 +42,7 @@ const normalizeDueDateValue = (value) => {
 }
 
 const buildCurrentMonthPaymentRoomKey = (apartmentName, roomName) => `${apartmentName}::${roomName}`
+const MAINTENANCE_TYPES = ['aircon', 'water', 'painting', 'cleaning', 'toilet']
 
 export const getCurrentMonthKey = (date = new Date()) => {
   const year = date.getFullYear()
@@ -84,6 +86,57 @@ const normalizeCurrentMonthPayments = (value, month = getCurrentMonthKey()) => {
     rooms
   }
 }
+
+const normalizeMaintenanceDate = (value) => {
+  if (typeof value !== 'string') return ''
+
+  const trimmed = value.trim()
+  if (!trimmed) return ''
+
+  const parsed = new Date(trimmed)
+  if (Number.isNaN(parsed.getTime())) return ''
+
+  const year = parsed.getFullYear()
+  const month = String(parsed.getMonth() + 1).padStart(2, '0')
+  const day = String(parsed.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
+const normalizeMaintenanceEntries = (entries) => (
+  Array.isArray(entries)
+    ? entries
+        .map(entry => ({
+          date: normalizeMaintenanceDate(entry?.date),
+          createdAt: typeof entry?.createdAt === 'string' ? entry.createdAt : ''
+        }))
+        .filter(entry => entry.date)
+        .sort((first, second) => new Date(second.date) - new Date(first.date))
+    : []
+)
+
+const normalizeMaintenanceHistory = (value) => ({
+  apartments: Array.isArray(value?.apartments)
+    ? value.apartments.map(apartment => ({
+        apartment: apartment?.apartment ?? '',
+        rooms: Array.isArray(apartment?.rooms)
+          ? apartment.rooms.map(room => {
+              const normalizedHistory = Object.fromEntries(
+                MAINTENANCE_TYPES.map(type => [
+                  type,
+                  normalizeMaintenanceEntries(room?.history?.[type])
+                ])
+              )
+
+              return {
+                room: room?.room ?? '',
+                history: normalizedHistory
+              }
+            })
+          : []
+      }))
+    : []
+})
 
 const getRecordMonthKey = (record = {}) => {
   if (typeof record.date !== 'string') return ''
@@ -392,13 +445,81 @@ export const setCurrentMonthPaymentStatus = (apartmentName, roomName, paid) => {
   setCurrentMonthPayments(payments)
 }
 
+export const getMaintenanceHistory = () => (
+  normalizeMaintenanceHistory(readJson(MAINTENANCE_HISTORY_KEY, { apartments: [] }))
+)
+
+export const setMaintenanceHistory = (maintenanceHistory) => {
+  writeJson(MAINTENANCE_HISTORY_KEY, normalizeMaintenanceHistory(maintenanceHistory))
+}
+
+export const saveMaintenanceEntry = (apartmentName, roomName, maintenanceType, date) => {
+  if (
+    !apartmentName ||
+    !roomName ||
+    !MAINTENANCE_TYPES.includes(maintenanceType)
+  ) {
+    return
+  }
+
+  const normalizedDate = normalizeMaintenanceDate(date)
+  if (!normalizedDate) return
+
+  const stored = getMaintenanceHistory()
+  let apartment = stored.apartments.find(item => item.apartment === apartmentName)
+
+  if (!apartment) {
+    apartment = {
+      apartment: apartmentName,
+      rooms: []
+    }
+    stored.apartments.push(apartment)
+  }
+
+  let room = apartment.rooms.find(item => item.room === roomName)
+
+  if (!room) {
+    room = {
+      room: roomName,
+      history: Object.fromEntries(MAINTENANCE_TYPES.map(type => [type, []]))
+    }
+    apartment.rooms.push(room)
+  }
+
+  room.history[maintenanceType] = normalizeMaintenanceEntries([
+    ...(room.history[maintenanceType] ?? []),
+    {
+      date: normalizedDate,
+      createdAt: new Date().toISOString()
+    }
+  ])
+
+  setMaintenanceHistory(stored)
+}
+
+export const getLatestMaintenanceDate = (apartmentName, roomName, maintenanceType) => {
+  if (
+    !apartmentName ||
+    !roomName ||
+    !MAINTENANCE_TYPES.includes(maintenanceType)
+  ) {
+    return ''
+  }
+
+  const apartment = getMaintenanceHistory().apartments.find(item => item.apartment === apartmentName)
+  const room = apartment?.rooms?.find(item => item.room === roomName)
+
+  return room?.history?.[maintenanceType]?.[0]?.date ?? ''
+}
+
 export const exportAppData = () => ({
   apartments: getApartments(),
   meterRecords: getMeterRecords(),
   wifiRates: getWifiRates(),
   waterRates: getWaterRates(),
   dueDates: getDueDates(),
-  currentMonthPayments: getCurrentMonthPayments()
+  currentMonthPayments: getCurrentMonthPayments(),
+  maintenanceHistory: getMaintenanceHistory()
 })
 
 export const importAppData = (data) => {
@@ -453,5 +574,11 @@ export const importAppData = (data) => {
     data?.currentMonthPayments
       ? data.currentMonthPayments
       : { month: getCurrentMonthKey(), rooms: {} }
+  )
+
+  setMaintenanceHistory(
+    Array.isArray(data?.maintenanceHistory?.apartments)
+      ? data.maintenanceHistory
+      : { apartments: [] }
   )
 }
