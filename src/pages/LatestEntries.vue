@@ -68,6 +68,15 @@
                       >
                         Copy
                       </v-btn>
+                      <v-btn
+                        size="small"
+                        variant="text"
+                        color="primary"
+                        class="ml-2"
+                        :to="getHistoryLink(record.room)"
+                      >
+                        View history
+                      </v-btn>
                     </td>
                   </tr>
                 </tbody>
@@ -85,7 +94,8 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import {
   getApartments,
   getElectricAmount,
@@ -93,9 +103,25 @@ import {
   getTotalAmount
 } from '../utils/storage'
 
-const selectedApartment = ref('')
+const route = useRoute()
+const router = useRouter()
+
+const selectedApartment = ref(
+  typeof route.query.apartment === 'string' ? route.query.apartment : ''
+)
 
 const apartmentNames = computed(() => getApartments().map(apartment => apartment.name))
+
+watch(selectedApartment, (apartment) => {
+  const currentApartment = typeof route.query.apartment === 'string' ? route.query.apartment : ''
+
+  if (currentApartment === (apartment || '')) return
+
+  router.replace({
+    path: '/latest',
+    query: apartment ? { apartment } : {}
+  })
+})
 
 const records = computed(() => {
   if (!selectedApartment.value) return []
@@ -137,6 +163,14 @@ const copyAmount = (record) => {
   navigator.clipboard.writeText(text)
   alert('Copied to clipboard!')
 }
+
+const getHistoryLink = (room) => ({
+  path: '/meter-history',
+  query: {
+    apartment: selectedApartment.value,
+    room
+  }
+})
 </script>
 
 <style scoped>

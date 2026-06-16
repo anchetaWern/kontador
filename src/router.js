@@ -3,6 +3,7 @@ import ApartmentSetup from './pages/ApartmentSetup.vue'
 import DashboardPage from './pages/DashboardPage.vue'
 import MeterEntry from './pages/MeterEntry.vue'
 import LatestEntries from './pages/LatestEntries.vue'
+import MeterHistory from './pages/MeterHistory.vue'
 import DataBackupAndRestore from './pages/DataBackupAndRestore.vue'
 import WifiRate from './pages/WifiRate.vue'
 import WaterRate from './pages/WaterRate.vue'
@@ -17,6 +18,7 @@ const routes = [
   { path: '/water-rate', component: WaterRate },
   { path: '/due-date', component: DueDate },
   { path: '/latest', component: LatestEntries },
+  { path: '/meter-history', component: MeterHistory },
   { path: '/maintenance', component: DataBackupAndRestore },
 ]
 

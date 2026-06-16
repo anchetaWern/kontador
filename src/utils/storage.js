@@ -392,25 +392,9 @@ export const setCurrentMonthPaymentStatus = (apartmentName, roomName, paid) => {
   setCurrentMonthPayments(payments)
 }
 
-export const buildLatestMeterRecords = () => (
-  getMeterRecords().map(apartment => ({
-    apartment: apartment.apartment,
-    rooms: apartment.rooms.map(room => {
-      const latestRecord = room.records?.length
-        ? room.records[room.records.length - 1]
-        : null
-
-      return {
-        room: room.room,
-        records: latestRecord ? [latestRecord] : []
-      }
-    })
-  }))
-)
-
 export const exportAppData = () => ({
   apartments: getApartments(),
-  meterRecords: buildLatestMeterRecords(),
+  meterRecords: getMeterRecords(),
   wifiRates: getWifiRates(),
   waterRates: getWaterRates(),
   dueDates: getDueDates(),
