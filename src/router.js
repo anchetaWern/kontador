@@ -9,6 +9,7 @@ import MaintenancePage from './pages/MaintenancePage.vue'
 import WifiRate from './pages/WifiRate.vue'
 import WaterRate from './pages/WaterRate.vue'
 import DueDate from './pages/DueDate.vue'
+import AmenitiesPage from './pages/AmenitiesPage.vue'
 
 const routes = [
   { path: '/', redirect: '/dashboard' },
@@ -18,6 +19,7 @@ const routes = [
   { path: '/wifi-rate', component: WifiRate },
   { path: '/water-rate', component: WaterRate },
   { path: '/due-date', component: DueDate },
+  { path: '/amenities', component: AmenitiesPage },
   { path: '/latest', component: LatestEntries },
   { path: '/meter-history', component: MeterHistory },
   { path: '/maintenance', component: MaintenancePage },

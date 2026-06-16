@@ -4,6 +4,7 @@ const WIFI_RATE_KEY = 'wifiRate'
 const WIFI_RATES_KEY = 'wifiRates'
 const WATER_RATES_KEY = 'waterRates'
 const DUE_DATES_KEY = 'dueDates'
+const AMENITIES_KEY = 'amenities'
 const CURRENT_MONTH_PAYMENTS_KEY = 'currentMonthPayments'
 const MAINTENANCE_HISTORY_KEY = 'maintenanceHistory'
 
@@ -366,6 +367,53 @@ export const setDueDate = (apartmentName, roomName, dueDate) => {
   setDueDates(stored)
 }
 
+export const getAmenities = () => {
+  const stored = readJson(AMENITIES_KEY, { apartments: [] })
+  return {
+    apartments: Array.isArray(stored?.apartments) ? stored.apartments : []
+  }
+}
+
+export const setAmenities = (amenities) => {
+  writeJson(AMENITIES_KEY, amenities)
+}
+
+export const getRoomAmenities = (apartmentName, roomName) => {
+  if (!apartmentName || !roomName) return ''
+
+  const stored = getAmenities()
+  const apartment = stored.apartments.find(item => item.apartment === apartmentName)
+  const room = apartment?.rooms?.find(item => item.room === roomName)
+
+  return typeof room?.amenities === 'string' ? room.amenities : ''
+}
+
+export const setRoomAmenities = (apartmentName, roomName, amenities) => {
+  const stored = getAmenities()
+  let apartment = stored.apartments.find(item => item.apartment === apartmentName)
+
+  if (!apartment) {
+    apartment = {
+      apartment: apartmentName,
+      rooms: []
+    }
+    stored.apartments.push(apartment)
+  }
+
+  let room = apartment.rooms.find(item => item.room === roomName)
+
+  if (!room) {
+    room = {
+      room: roomName,
+      amenities: ''
+    }
+    apartment.rooms.push(room)
+  }
+
+  room.amenities = typeof amenities === 'string' ? amenities.trim() : ''
+  setAmenities(stored)
+}
+
 export const getLatestRoomRecord = (apartmentName, roomName) => {
   if (!apartmentName || !roomName) return null
 
@@ -518,6 +566,7 @@ export const exportAppData = () => ({
   wifiRates: getWifiRates(),
   waterRates: getWaterRates(),
   dueDates: getDueDates(),
+  amenities: getAmenities(),
   currentMonthPayments: getCurrentMonthPayments(),
   maintenanceHistory: getMaintenanceHistory()
 })
@@ -563,6 +612,22 @@ export const importAppData = (data) => {
               ? apartment.rooms.map(room => ({
                   room: room?.room ?? '',
                   dueDate: normalizeDueDateValue(room?.dueDate)
+                }))
+              : []
+          }))
+        }
+      : { apartments: [] }
+  )
+
+  setAmenities(
+    Array.isArray(data?.amenities?.apartments)
+      ? {
+          apartments: data.amenities.apartments.map(apartment => ({
+            apartment: apartment?.apartment ?? '',
+            rooms: Array.isArray(apartment?.rooms)
+              ? apartment.rooms.map(room => ({
+                  room: room?.room ?? '',
+                  amenities: typeof room?.amenities === 'string' ? room.amenities : ''
                 }))
               : []
           }))

@@ -51,6 +51,13 @@
           </div>
         </v-list-item>
 
+        <v-list-item link :to="{ path: '/amenities' }" @click="drawer = false">
+          <div class="d-flex align-center gap-3">
+            <v-icon>mdi-sofa</v-icon>
+            <span>Amenities</span>
+          </div>
+        </v-list-item>
+
         <v-list-item link :to="{ path: '/latest' }" @click="drawer = false">
           <div class="d-flex align-center gap-3">
             <v-icon>mdi-table</v-icon>
