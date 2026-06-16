@@ -43,7 +43,7 @@ const normalizeDueDateValue = (value) => {
 }
 
 const buildCurrentMonthPaymentRoomKey = (apartmentName, roomName) => `${apartmentName}::${roomName}`
-const MAINTENANCE_TYPES = ['aircon', 'water', 'painting', 'cleaning', 'toilet']
+const MAINTENANCE_TYPES = ['aircon', 'water', 'painting', 'cleaning', 'toilet', 'submeter']
 
 export const getCurrentMonthKey = (date = new Date()) => {
   const year = date.getFullYear()

@@ -123,7 +123,8 @@ const maintenanceTypes = [
   { type: 'water', label: 'Water Maintenance' },
   { type: 'painting', label: 'Painting Maintenance' },
   { type: 'cleaning', label: 'Cleaning Maintenance' },
-  { type: 'toilet', label: 'Toilet Maintenance' }
+  { type: 'toilet', label: 'Toilet Maintenance' },
+  { type: 'submeter', label: 'Submeter Maintenance' }
 ]
 
 const refreshKey = ref(0)
