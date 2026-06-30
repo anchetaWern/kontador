@@ -141,23 +141,32 @@ const drawer = ref(false)
 
 const deferredPrompt = ref(null)
 const showInstallBanner = ref(false)
-const closeBanner = ref(false);
+const closeBanner = ref(false)
+const isInstalled = ref(false)
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
-console.log('is ios: ', isIOS);
+
+const detectInstalledMode = () =>
+  window.matchMedia('(display-mode: standalone)').matches ||
+  window.matchMedia('(display-mode: fullscreen)').matches ||
+  window.matchMedia('(display-mode: minimal-ui)').matches ||
+  window.navigator.standalone === true ||
+  document.referrer.startsWith('android-app://')
 
 onMounted(() => {
-  // Already installed? Don’t show banner
-  const isInstalled =
-    window.matchMedia('(display-mode: standalone)').matches ||
-    window.navigator.standalone === true
-    console.log('is installed: ', isInstalled);
+  isInstalled.value = detectInstalledMode()
 
-  if (isInstalled) return
+  if (isInstalled.value) return
 
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault()
     deferredPrompt.value = e
     showInstallBanner.value = true
+  })
+
+  window.addEventListener('appinstalled', () => {
+    isInstalled.value = true
+    showInstallBanner.value = false
+    closeBanner.value = true
   })
 })
 
@@ -177,7 +186,7 @@ const installPWA = async () => {
 
 const dismissBanner = () => {
   showInstallBanner.value = false
-  closeBanner.value = true;
+  closeBanner.value = true
 }
 </script>
 
