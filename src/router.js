@@ -8,6 +8,7 @@ import DataBackupAndRestore from './pages/DataBackupAndRestore.vue'
 import MaintenancePage from './pages/MaintenancePage.vue'
 import WifiRate from './pages/WifiRate.vue'
 import WaterRate from './pages/WaterRate.vue'
+import RoomRate from './pages/RoomRate.vue'
 import DueDate from './pages/DueDate.vue'
 import AmenitiesPage from './pages/AmenitiesPage.vue'
 
@@ -18,6 +19,7 @@ const routes = [
   { path: '/meter', component: MeterEntry },
   { path: '/wifi-rate', component: WifiRate },
   { path: '/water-rate', component: WaterRate },
+  { path: '/room-rate', component: RoomRate },
   { path: '/due-date', component: DueDate },
   { path: '/amenities', component: AmenitiesPage },
   { path: '/latest', component: LatestEntries },

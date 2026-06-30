@@ -44,6 +44,13 @@
           </div>
         </v-list-item>
 
+        <v-list-item link :to="{ path: '/room-rate' }" @click="drawer = false">
+          <div class="d-flex align-center gap-3">
+            <v-icon>mdi-home-currency-usd</v-icon>
+            <span>Room Rate</span>
+          </div>
+        </v-list-item>
+
         <v-list-item link :to="{ path: '/due-date' }" @click="drawer = false">
           <div class="d-flex align-center gap-3">
             <v-icon>mdi-calendar-month</v-icon>

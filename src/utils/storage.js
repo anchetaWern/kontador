@@ -3,6 +3,7 @@ const METER_RECORDS_KEY = 'meterRecords'
 const WIFI_RATE_KEY = 'wifiRate'
 const WIFI_RATES_KEY = 'wifiRates'
 const WATER_RATES_KEY = 'waterRates'
+const ROOM_RATES_KEY = 'roomRates'
 const DUE_DATES_KEY = 'dueDates'
 const AMENITIES_KEY = 'amenities'
 const CURRENT_MONTH_PAYMENTS_KEY = 'currentMonthPayments'
@@ -173,6 +174,7 @@ export const getTotalAmount = (record = {}) => {
 
   return (
     getElectricAmount(record) +
+    toNumber(record.room_rate) +
     toNumber(record.wifi_rate) +
     toNumber(record.water_rate)
   )
@@ -186,6 +188,7 @@ export const normalizeRecord = (record = {}) => ({
   current_reading: toNumber(record.current_reading),
   kwh_rate: toNumber(record.kwh_rate),
   electric_amount: Number(getElectricAmount(record).toFixed(2)),
+  room_rate: toNumber(record.room_rate),
   wifi_rate: toNumber(record.wifi_rate),
   water_rate: toNumber(record.water_rate),
   total_amount: Number(getTotalAmount(record).toFixed(2))
@@ -318,6 +321,53 @@ export const setWaterRate = (apartmentName, roomName, amount) => {
 
   room.amount = toNumber(amount)
   setWaterRates(stored)
+}
+
+export const getRoomRates = () => {
+  const stored = readJson(ROOM_RATES_KEY, { apartments: [] })
+  return {
+    apartments: Array.isArray(stored?.apartments) ? stored.apartments : []
+  }
+}
+
+export const setRoomRates = (roomRates) => {
+  writeJson(ROOM_RATES_KEY, roomRates)
+}
+
+export const getRoomRate = (apartmentName, roomName) => {
+  if (!apartmentName || !roomName) return 0
+
+  const stored = getRoomRates()
+  const apartment = stored.apartments.find(item => item.apartment === apartmentName)
+  const room = apartment?.rooms?.find(item => item.room === roomName)
+
+  return toNumber(room?.amount)
+}
+
+export const setRoomRate = (apartmentName, roomName, amount) => {
+  const stored = getRoomRates()
+  let apartment = stored.apartments.find(item => item.apartment === apartmentName)
+
+  if (!apartment) {
+    apartment = {
+      apartment: apartmentName,
+      rooms: []
+    }
+    stored.apartments.push(apartment)
+  }
+
+  let room = apartment.rooms.find(item => item.room === roomName)
+
+  if (!room) {
+    room = {
+      room: roomName,
+      amount: 0
+    }
+    apartment.rooms.push(room)
+  }
+
+  room.amount = toNumber(amount)
+  setRoomRates(stored)
 }
 
 export const getDueDates = () => {
@@ -565,6 +615,7 @@ export const exportAppData = () => ({
   meterRecords: getMeterRecords(),
   wifiRates: getWifiRates(),
   waterRates: getWaterRates(),
+  roomRates: getRoomRates(),
   dueDates: getDueDates(),
   amenities: getAmenities(),
   currentMonthPayments: getCurrentMonthPayments(),
@@ -600,6 +651,12 @@ export const importAppData = (data) => {
   setWaterRates(
     Array.isArray(data?.waterRates?.apartments)
       ? data.waterRates
+      : { apartments: [] }
+  )
+
+  setRoomRates(
+    Array.isArray(data?.roomRates?.apartments)
+      ? data.roomRates
       : { apartments: [] }
   )
 

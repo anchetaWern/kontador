@@ -48,6 +48,10 @@
                     <td>{{ record.electric_amount.toFixed(2) }}</td>
                   </tr>
                   <tr>
+                    <td class="col-name"><strong>Room Rate (₱)</strong></td>
+                    <td>{{ record.room_rate.toFixed(2) }}</td>
+                  </tr>
+                  <tr>
                     <td class="col-name"><strong>Wifi Rate (₱)</strong></td>
                     <td>{{ record.wifi_rate.toFixed(2) }}</td>
                   </tr>
@@ -145,6 +149,7 @@ const records = computed(() => {
         current_reading: latestRecord.current_reading ?? 0,
         kwh_rate: latestRecord.kwh_rate ?? 0,
         electric_amount: getElectricAmount(latestRecord),
+        room_rate: Number(latestRecord.room_rate ?? 0),
         wifi_rate: Number(latestRecord.wifi_rate ?? 0),
         water_rate: Number(latestRecord.water_rate ?? 0),
         total_amount: getTotalAmount(latestRecord)
@@ -156,7 +161,7 @@ const records = computed(() => {
 
 const copyAmount = (record) => {
   const text = `${record.room}: ${record.tenant}: Total ₱${record.total_amount.toFixed(2)}. ` +
-    `Electric ₱${record.electric_amount.toFixed(2)}, Wifi ₱${record.wifi_rate.toFixed(2)}, ` +
+    `Electric ₱${record.electric_amount.toFixed(2)}, Room Rate ₱${record.room_rate.toFixed(2)}, Wifi ₱${record.wifi_rate.toFixed(2)}, ` +
     `Water ₱${record.water_rate.toFixed(2)}. ` +
     `Break down: (${record.current_reading} - ${record.prev_reading}) * ${record.kwh_rate}`
 

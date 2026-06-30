@@ -80,6 +80,14 @@
               </div>
 
               <div class="info-row">
+                <span>Room Rate</span>
+                <strong v-if="room.hasCurrentMonthBill" class="bill-total">
+                  ₱ {{ room.roomRateDisplay }}
+                </strong>
+                <strong v-else class="text-medium-emphasis">Not entered yet</strong>
+              </div>
+
+              <div class="info-row">
                 <span>Wifi</span>
                 <strong v-if="room.hasCurrentMonthBill" class="bill-total">
                   ₱ {{ room.wifiBillDisplay }}
@@ -229,6 +237,9 @@ const roomSummaries = computed(() => {
           : '0.00',
         electricBillDisplay: currentMonthRecord
           ? formatCurrencyAmount(getElectricAmount(currentMonthRecord))
+          : '0.00',
+        roomRateDisplay: currentMonthRecord
+          ? formatCurrencyAmount(currentMonthRecord.room_rate)
           : '0.00',
         wifiBillDisplay: currentMonthRecord
           ? formatCurrencyAmount(currentMonthRecord.wifi_rate)

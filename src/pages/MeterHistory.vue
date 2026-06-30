@@ -67,6 +67,10 @@
                     <td>{{ record.electric_amount.toFixed(2) }}</td>
                   </tr>
                   <tr>
+                    <td class="col-name"><strong>Room Rate (₱)</strong></td>
+                    <td>{{ record.room_rate.toFixed(2) }}</td>
+                  </tr>
+                  <tr>
                     <td class="col-name"><strong>Wifi Rate (₱)</strong></td>
                     <td>{{ record.wifi_rate.toFixed(2) }}</td>
                   </tr>

@@ -64,6 +64,14 @@
             />
 
             <v-text-field
+              v-model.number="form.room_rate"
+              label="Room Rate"
+              type="number"
+              step="0.01"
+              min="0"
+            />
+
+            <v-text-field
               v-model.number="form.wifi_rate"
               label="Wifi Rate"
               type="number"
@@ -82,6 +90,10 @@
             <v-card class="mt-4 summary-card" color="yellow-lighten-5" variant="tonal">
               <v-card-text>
                 <div class="summary-label">Bill Breakdown: {{ form.room || 'No room selected' }}</div>
+                <div class="summary-line">
+                  <span>Room Rate</span>
+                  <strong>₱ {{ Number(form.room_rate || 0).toFixed(2) }}</strong>
+                </div>
                 <div class="summary-line">
                   <span>Electric</span>
                   <strong>₱ {{ electricAmount.toFixed(2) }}</strong>
@@ -120,6 +132,7 @@ import {
   getDueDate,
   getLatestRoomRecord,
   getMeterRecords,
+  getRoomRate,
   getWaterRate,
   getWifiRate,
   setMeterRecords
@@ -144,6 +157,7 @@ const createDefaultForm = () => ({
   kwh_rate: 12.16,
   prev_reading: 0,
   current_reading: null,
+  room_rate: 0,
   wifi_rate: 0,
   water_rate: 0
 })
@@ -174,6 +188,7 @@ const resetForm = () => {
 }
 
 const hydrateRoomRates = () => {
+  form.value.room_rate = getRoomRate(form.value.apartment, form.value.room)
   form.value.wifi_rate = getWifiRate(form.value.apartment, form.value.room)
   form.value.water_rate = getWaterRate(form.value.apartment, form.value.room)
 }
@@ -227,6 +242,7 @@ const electricAmount = computed(() => {
 
 const totalAmount = computed(() => (
   electricAmount.value +
+  Number(form.value.room_rate || 0) +
   Number(form.value.wifi_rate || 0) +
   Number(form.value.water_rate || 0)
 ))
@@ -261,6 +277,7 @@ const submit = () => {
     prev_reading: Number(form.value.prev_reading),
     kwh_rate: Number(form.value.kwh_rate || 0),
     electric_amount: Number(electricAmount.value.toFixed(2)),
+    room_rate: Number(form.value.room_rate || 0),
     wifi_rate: Number(form.value.wifi_rate || 0),
     water_rate: Number(form.value.water_rate || 0),
     total_amount: Number(totalAmount.value.toFixed(2))
