@@ -46,7 +46,7 @@
 
         <v-list-item link :to="{ path: '/room-rate' }" @click="drawer = false">
           <div class="d-flex align-center gap-3">
-            <v-icon>mdi-home-currency-usd</v-icon>
+            <v-icon>mdi-bed</v-icon>
             <span>Room Rate</span>
           </div>
         </v-list-item>
