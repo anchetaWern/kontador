@@ -71,6 +71,30 @@
                 <strong v-else class="text-medium-emphasis">Not entered yet</strong>
               </div>
 
+              <div class="info-row">
+                <span>Electric</span>
+                <strong v-if="room.hasCurrentMonthBill" class="bill-total">
+                  ₱ {{ room.electricBillDisplay }}
+                </strong>
+                <strong v-else class="text-medium-emphasis">Not entered yet</strong>
+              </div>
+
+              <div class="info-row">
+                <span>Wifi</span>
+                <strong v-if="room.hasCurrentMonthBill" class="bill-total">
+                  ₱ {{ room.wifiBillDisplay }}
+                </strong>
+                <strong v-else class="text-medium-emphasis">Not entered yet</strong>
+              </div>
+
+              <div class="info-row">
+                <span>Water</span>
+                <strong v-if="room.hasCurrentMonthBill" class="bill-total">
+                  ₱ {{ room.waterBillDisplay }}
+                </strong>
+                <strong v-else class="text-medium-emphasis">Not entered yet</strong>
+              </div>
+
               <div v-if="room.resetDateLabel" class="reset-note">
                 Resets to not paid on {{ room.resetDateLabel }}.
               </div>
@@ -95,6 +119,7 @@
 import { computed, ref, watch } from 'vue'
 import {
   getApartments,
+  getElectricAmount,
   getEffectiveCurrentMonthPaymentStatus,
   getCurrentMonthKey,
   getCurrentMonthRoomRecord,
@@ -153,6 +178,8 @@ const formatDueDate = (value) => {
   })
 }
 
+const formatCurrencyAmount = (value) => Number(value || 0).toFixed(2)
+
 const getResetDateLabel = (dueDate) => {
   if (!dueDate) return ''
 
@@ -198,7 +225,16 @@ const roomSummaries = computed(() => {
         resetDateLabel: getResetDateLabel(dueDate),
         hasCurrentMonthBill: Boolean(currentMonthRecord),
         totalBillDisplay: currentMonthRecord
-          ? getTotalAmount(currentMonthRecord).toFixed(2)
+          ? formatCurrencyAmount(getTotalAmount(currentMonthRecord))
+          : '0.00',
+        electricBillDisplay: currentMonthRecord
+          ? formatCurrencyAmount(getElectricAmount(currentMonthRecord))
+          : '0.00',
+        wifiBillDisplay: currentMonthRecord
+          ? formatCurrencyAmount(currentMonthRecord.wifi_rate)
+          : '0.00',
+        waterBillDisplay: currentMonthRecord
+          ? formatCurrencyAmount(currentMonthRecord.water_rate)
           : '0.00',
         paid: getEffectiveCurrentMonthPaymentStatus(
           selectedApartment.value,
